@@ -292,8 +292,8 @@ const App: React.FC = () => {
     );
 
     return (
-        <main className={`w-screen h-screen bg-gray-900 text-white flex overflow-hidden font-sans ${orientation === 'landscape' ? 'flex-row' : 'flex-col'}`}>
-            <header className={`absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-black/20 backdrop-blur-sm ${orientation === 'landscape' ? 'bg-opacity-0 backdrop-blur-none' : ''}`}>
+        <main className="w-screen h-screen bg-gray-900 text-white flex flex-col overflow-hidden font-sans">
+            <header className="flex-shrink-0 flex items-center justify-between p-4 bg-black/20 backdrop-blur-sm z-10">
                 <div className="flex items-center gap-3">
                     <LogoIcon />
                     <h1 className="text-xl font-bold text-white">Lynk</h1>
@@ -306,23 +306,25 @@ const App: React.FC = () => {
                 </button>
             </header>
 
-            <div className="flex-1 flex flex-col relative pt-16 md:pt-0">
-                <MapPanel
-                    trip={trip}
-                    route={ROUTE_SEGMENTS}
-                    appMode={appMode}
-                    commuterPosition={commuterPosition}
-                    commuterStatus={commuterStatus}
-                    commuterAvatar={commuterPreferences.avatar}
-                    isMapCached={isMapCached}
-                    hailPings={hailPings}
-                    walkieTalkieMessages={walkieTalkieMessages}
-                />
-            </div>
+            <div className={`flex flex-1 overflow-hidden ${orientation === 'landscape' ? 'flex-row' : 'flex-col'}`}>
+                <div className="flex-1 flex flex-col relative">
+                    <MapPanel
+                        trip={trip}
+                        route={ROUTE_SEGMENTS}
+                        appMode={appMode}
+                        commuterPosition={commuterPosition}
+                        commuterStatus={commuterStatus}
+                        commuterAvatar={commuterPreferences.avatar}
+                        isMapCached={isMapCached}
+                        hailPings={hailPings}
+                        walkieTalkieMessages={walkieTalkieMessages}
+                    />
+                </div>
 
-            <aside className={`flex flex-col gap-4 p-4 overflow-y-auto bg-black/30 backdrop-blur-md border-gray-800 ${orientation === 'landscape' ? 'w-96 border-l' : 'h-1/2 border-t'}`}>
-                {appMode === AppMode.Driver ? renderDriverPanels() : renderCommuterPanels()}
-            </aside>
+                <aside className={`flex flex-col gap-4 p-4 overflow-y-auto bg-black/30 backdrop-blur-md border-gray-800 ${orientation === 'landscape' ? 'w-96 border-l' : 'h-1/2 border-t'}`}>
+                    {appMode === AppMode.Driver ? renderDriverPanels() : renderCommuterPanels()}
+                </aside>
+            </div>
 
             <Notifications notifications={notifications} setNotifications={setNotifications} />
             <SettingsModal
