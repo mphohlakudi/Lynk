@@ -1,15 +1,13 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Trip, MinibusStatus, AIInsight, Notification, DriverFeedbackResponse, Point, TripPhase, AppMode, CommuterStatus, CommuterStatusType, OptimizedRouteResponse, PredictiveETAResponse, DriverBehaviorResponse, LandmarkDirectionsResponse, HotspotSuggestionResponse, OfflineMapRegion, HailPing, Destination, WalkieTalkieMessage, CommuterPreferences, CommuterAvatar, TripLog, PassengerReportCategory } from './types';
+import { Trip, MinibusStatus, AIInsight, Notification, DriverFeedbackResponse, Point, TripPhase, AppMode, CommuterStatus, CommuterStatusType, OptimizedRouteResponse, PredictiveETAResponse, DriverBehaviorResponse, HotspotSuggestionResponse, OfflineMapRegion, HailPing, Destination, WalkieTalkieMessage, CommuterPreferences, CommuterAvatar, TripLog, PassengerReportCategory } from './types';
 import { INITIAL_TRIP_DATA, ROUTE_SEGMENTS, DRIVER_PIN, DESTINATIONS } from './constants';
 import MapPanel from './components/MapPanel';
 import TripDetailsPanel from './components/TripDetailsPanel';
 import AIInsightsPanel from './components/AIInsightsPanel';
 import Notifications from './components/Notifications';
-import { getDriverBehaviorAnalysis, getDriverFeedback, getHotspotSuggestion, getLandmarkDirections, getPredictiveEta, getRouteOptimization } from './services/geminiService';
+import { getDriverBehaviorAnalysis, getDriverFeedback, getHotspotSuggestion, getPredictiveEta, getRouteOptimization } from './services/geminiService';
 import { LogoIcon } from './components/icons/LogoIcon';
-import DriverProfilePanel from './components/DriverProfilePanel';
-import LandmarkNavigationPanel from './components/LandmarkNavigationPanel';
 import { SettingsIcon } from './components/icons/SettingsIcon';
 import SettingsModal from './components/SettingsModal';
 import CommuterStatusPanel from './components/CommuterStatusPanel';
@@ -19,8 +17,6 @@ import { tripLogService } from './services/tripLogService';
 import TripLogPanel from './components/TripLogPanel';
 import CommuterFeedbackPanel from './components/CommuterFeedbackPanel';
 import { hapticService } from './services/hapticService';
-import CrowdsourcePanel from './components/CrowdsourcePanel';
-import { IncidentType } from './types';
 
 // Bounding box for mapping real-world GPS coordinates to the 100x100 SVG map.
 // This is based on the OSM data for Apel, Limpopo.
@@ -85,8 +81,6 @@ const App: React.FC = () => {
     const [commuterStatus, setCommuterStatus] = useState<CommuterStatus>({ type: CommuterStatusType.IDLE, message: 'Waiting for Taxi' });
     const [commuterPosition, setCommuterPosition] = useState<Point | null>({ x: 50, y: 50 });
     const [commuterPreferences, setCommuterPreferences] = useState<CommuterPreferences>({ id: 'commuter-1', avatar: CommuterAvatar.DOT, name: 'Alex', hapticFeedbackEnabled: true });
-    const [landmarkDirections, setLandmarkDirections] = useState<string[]>([]);
-    const [isLandmarkDirectionsLoading, setIsLandmarkDirectionsLoading] = useState<boolean>(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
     const [walkieTalkieMessages, setWalkieTalkieMessages] = useState<WalkieTalkieMessage[]>([]);
     const [isRecording, setIsRecording] = useState(false);
@@ -121,7 +115,6 @@ const App: React.FC = () => {
             else if (response.predictiveETA) content = `New ETA: ${response.predictiveETA} mins\nFactors: ${response.factors.join(', ')}`;
             else if (response.summary) content = `Summary: ${response.summary}\nSuggestions: ${response.suggestions.join('\n- ')}`;
             else if (response.feedback) content = `Rating: ${response.rating.toFixed(1)}/5\nFeedback: ${response.feedback}`;
-            else if (response.directions) content = response.directions.join('\n');
             else if (response.hotspot) content = `Suggestion: Go to ${response.hotspot}\nReason: ${response.reason}`;
 
             setAiInsights(prev => prev.map(i => i.id === insightId ? { ...i, content, isLoading: false } : i));
@@ -136,15 +129,6 @@ const App: React.FC = () => {
     const handlePredictiveETA = () => addAiInsight('Predictive ETA', () => getPredictiveEta(trip.eta, trip.progress));
     const handleAnalyzeBehavior = () => addAiInsight('Driver Behavior', () => getDriverBehaviorAnalysis({ idleTime: trip.stoppedTime, harshBrakingEvents: 3, frequentStops: trip.stops }));
     const handleGetFeedback = () => addAiInsight('Driver Feedback', () => getDriverFeedback({ stops: trip.stops, idleTime: trip.stoppedTime }));
-    const handleGetDirections = () => {
-        if (trip.segmentIndex >= 0 && trip.segmentIndex < ROUTE_SEGMENTS.length) {
-            setIsLandmarkDirectionsLoading(true);
-            addAiInsight('Landmark Directions', () => getLandmarkDirections(ROUTE_SEGMENTS[trip.segmentIndex], trip.destination))
-                .then(() => setIsLandmarkDirectionsLoading(false));
-        } else {
-            addNotification('Cannot get directions, trip not on main route.', 'warning');
-        }
-    };
     const handleSuggestHotspot = () => addAiInsight('Hotspot Suggestion', getHotspotSuggestion);
 
     // --- SETTINGS & MODE ---
@@ -225,11 +209,6 @@ const App: React.FC = () => {
         addNotification("Today's trip logs have been cleared.", "success");
     };
     
-    const handleAddIncident = (type: IncidentType, details?: string) => {
-        const message = details ? `${type}: ${details}` : `${type} reported nearby`;
-        addNotification(message, 'info');
-    };
-    
     const handleDownloadMap = (regionId: string) => {
          setOfflineRegions(prev => prev.map(r => r.id === regionId ? {...r, isDownloading: true} : r));
          setTimeout(() => {
@@ -248,21 +227,7 @@ const App: React.FC = () => {
 
     const renderDriverPanels = () => (
         <>
-            <DriverProfilePanel driver={trip.driver} />
             <TripDetailsPanel trip={trip} />
-            <AIInsightsPanel
-                insights={aiInsights}
-                onOptimizeRoute={handleOptimizeRoute}
-                onPredictiveETA={handlePredictiveETA}
-                onAnalyzeBehavior={handleAnalyzeBehavior}
-                onGetFeedback={handleGetFeedback}
-                onGetDirections={handleGetDirections}
-                onSuggestHotspot={handleSuggestHotspot}
-                isSimulating={isSimulating}
-                tripPhase={trip.phase}
-            />
-            <LandmarkNavigationPanel directions={landmarkDirections} isLoading={isLandmarkDirectionsLoading} />
-            <CrowdsourcePanel onAddIncident={handleAddIncident} isTripActive={isTripActive} />
             <WalkieTalkiePanel 
                 isRecording={isRecording}
                 onStartRecording={handleStartRecording}
@@ -270,7 +235,16 @@ const App: React.FC = () => {
                 messages={walkieTalkieMessages}
                 isTripActive={isTripActive}
             />
-            <TripLogPanel logs={dailyLogs} onClearLogs={handleClearLogs} />
+            <AIInsightsPanel
+                insights={aiInsights}
+                onOptimizeRoute={handleOptimizeRoute}
+                onPredictiveETA={handlePredictiveETA}
+                onAnalyzeBehavior={handleAnalyzeBehavior}
+                onGetFeedback={handleGetFeedback}
+                onSuggestHotspot={handleSuggestHotspot}
+                isSimulating={isSimulating}
+                tripPhase={trip.phase}
+            />
         </>
     );
 
@@ -340,6 +314,8 @@ const App: React.FC = () => {
                 onAvatarChange={(avatar) => setCommuterPreferences(p => ({ ...p, avatar }))}
                 onSetPin={handleSetPin}
                 onToggleHapticFeedback={() => setCommuterPreferences(p => ({ ...p, hapticFeedbackEnabled: !p.hapticFeedbackEnabled }))}
+                logs={dailyLogs}
+                onClearLogs={handleClearLogs}
             />
         </main>
     );

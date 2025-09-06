@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AppMode, OfflineMapRegion, CommuterPreferences, CommuterAvatar } from '../types';
+import { AppMode, OfflineMapRegion, CommuterPreferences, CommuterAvatar, TripLog } from '../types';
 import { MapIcon } from './icons/MapIcon';
 import { HeartIcon, CoinIcon, MolotovIcon, GhostIcon, KeyIcon, DotIcon } from './icons/CommuterAvatarIcons';
 import { HapticIcon } from './icons/HapticIcon';
+import TripLogPanel from './TripLogPanel';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -18,6 +19,8 @@ interface SettingsModalProps {
     onAvatarChange: (avatar: CommuterAvatar) => void;
     onSetPin: (newPin: string, confirmPin: string) => void;
     onToggleHapticFeedback: () => void;
+    logs: TripLog[];
+    onClearLogs: () => void;
 }
 
 const AvatarButton: React.FC<{ avatar: CommuterAvatar, currentAvatar: CommuterAvatar, onSelect: () => void, children: React.ReactNode }> = ({ avatar, currentAvatar, onSelect, children }) => {
@@ -35,7 +38,7 @@ const AvatarButton: React.FC<{ avatar: CommuterAvatar, currentAvatar: CommuterAv
 };
 
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, currentMode, onModeChange, offlineRegions, onDownloadMap, onDeleteMap, isDriverUnlocked, commuterPreferences, onAvatarChange, onSetPin, onToggleHapticFeedback }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, currentMode, onModeChange, offlineRegions, onDownloadMap, onDeleteMap, isDriverUnlocked, commuterPreferences, onAvatarChange, onSetPin, onToggleHapticFeedback, logs, onClearLogs }) => {
     const [pin, setPin] = useState('');
     const [newPin, setNewPin] = useState('');
     const [confirmPin, setConfirmPin] = useState('');
@@ -318,6 +321,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, currentM
                             ))}
                         </div>
                     </div>
+                    {/* Daily Trip Log Section */}
+                    {currentMode === AppMode.Driver && (
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-300 mb-2">Daily Trip Log</h3>
+                            <div className="bg-gray-800/50 p-4 rounded-lg">
+                                <TripLogPanel logs={logs} onClearLogs={onClearLogs} />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

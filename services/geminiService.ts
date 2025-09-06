@@ -1,5 +1,6 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
-import { DriverBehaviorData, DriverBehaviorResponse, OptimizedRouteResponse, PredictiveETAResponse, RouteSegment, DriverFeedbackResponse, LandmarkDirectionsResponse, HotspotSuggestionResponse } from '../types';
+import { DriverBehaviorData, DriverBehaviorResponse, OptimizedRouteResponse, PredictiveETAResponse, RouteSegment, DriverFeedbackResponse, HotspotSuggestionResponse } from '../types';
 
 if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable is not set.");
@@ -165,48 +166,6 @@ export async function getDriverFeedback(tripData: { stops: number; idleTime: num
         return data as DriverFeedbackResponse;
     } catch (e) {
         console.error("Failed to parse Gemini JSON response for driver feedback:", response.text);
-        throw new Error("Invalid response format from AI service.");
-    }
-}
-
-export async function getLandmarkDirections(currentSegment: RouteSegment, destination: string): Promise<LandmarkDirectionsResponse> {
-    const prompt = `
-        You are a helpful GPS assistant for a Taxi driver in a rural South African area where street names are not common.
-        Provide simple, clear, turn-by-turn directions from the current street to the final destination.
-        Crucially, you must reference the local landmarks provided.
-
-        - Current Location: On **${currentSegment.street}**
-        - Nearby Landmarks: **${currentSegment.landmarks?.join(', ') || 'None specified'}**
-        - Final Destination: **${destination}**
-
-        Generate a short list of directions. Be conversational and direct.
-    `;
-
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    directions: {
-                        type: Type.ARRAY,
-                        items: { type: Type.STRING },
-                        description: "A list of turn-by-turn directions using landmarks."
-                    }
-                },
-                required: ["directions"]
-            },
-        },
-    });
-
-    try {
-        const jsonText = response.text.trim();
-        const data = JSON.parse(jsonText);
-        return data as LandmarkDirectionsResponse;
-    } catch (e) {
-        console.error("Failed to parse Gemini JSON response for landmark directions:", response.text);
         throw new Error("Invalid response format from AI service.");
     }
 }

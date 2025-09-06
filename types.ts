@@ -88,25 +88,10 @@ export interface DriverFeedbackResponse {
     feedback: string;
 }
 
-export interface LandmarkDirectionsResponse {
-    directions: string[];
-}
-
 export interface HotspotSuggestionResponse {
     hotspot: string;
     reason: string;
 }
-
-// FIX: Add IncidentType enum to resolve import error in CrowdsourcePanel.tsx
-export enum IncidentType {
-    Traffic = 'TRAFFIC',
-    Accident = 'ACCIDENT',
-    Hazard = 'HAZARD',
-    Police = 'POLICE',
-    RoadClosure = 'ROAD_CLOSURE',
-    FuelPrice = 'FUEL_PRICE',
-}
-
 
 // Type for driver behavior data sent to Gemini
 export interface DriverBehaviorData {
@@ -119,6 +104,16 @@ export interface DriverBehaviorData {
 export enum AppMode {
     Driver = 'DRIVER',
     Commuter = 'COMMUTER',
+}
+
+// FIX: Added IncidentType enum for CrowdsourcePanel.
+export enum IncidentType {
+    Traffic = 'TRAFFIC',
+    Accident = 'ACCIDENT',
+    Police = 'POLICE',
+    Hazard = 'HAZARD',
+    RoadClosure = 'ROAD_CLOSURE',
+    FuelPrice = 'FUEL_PRICE',
 }
 
 // NEW TYPES for Commuter Experience

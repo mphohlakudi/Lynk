@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { TripLog } from '../types';
 import { tripLogService } from '../services/tripLogService';
@@ -55,45 +56,42 @@ const TripLogPanel: React.FC<TripLogPanelProps> = ({ logs, onClearLogs }) => {
     return (
         <>
             {isModalOpen && <LogModal content={formattedLog} onClose={() => setIsModalOpen(false)} />}
-            <details className="bg-black/60 backdrop-blur-sm p-4 rounded-xl shadow-2xl border border-gray-800">
-                <summary className="cursor-pointer font-bold text-white text-xl">Daily Trip Log</summary>
-                <div className="mt-4 border-t border-gray-700 pt-4 flex flex-col gap-4">
-                    {logs.length === 0 ? (
-                        <p className="text-gray-400 text-center">No trips have been logged today.</p>
-                    ) : (
-                        <>
-                            <div className="grid grid-cols-3 gap-2 text-center">
-                                <div>
-                                    <p className="text-2xl font-bold text-white">{summary.totalTrips}</p>
-                                    <p className="text-xs text-gray-400">Total Trips</p>
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-bold text-white">{Math.floor(summary.totalMovingTime / 60)}</p>
-                                    <p className="text-xs text-gray-400">Mins Moving</p>
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-bold text-white">{summary.totalReports}</p>
-                                    <p className="text-xs text-gray-400">Reports</p>
-                                </div>
+            <div className="flex flex-col gap-4">
+                {logs.length === 0 ? (
+                    <p className="text-gray-400 text-center">No trips have been logged today.</p>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                            <div>
+                                <p className="text-2xl font-bold text-white">{summary.totalTrips}</p>
+                                <p className="text-xs text-gray-400">Total Trips</p>
                             </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="w-full px-4 py-2 rounded-lg font-semibold transition-all bg-gray-700 hover:bg-gray-600 text-white"
-                                >
-                                    View Full Log
-                                </button>
-                                <button
-                                    onClick={handleClear}
-                                    className="w-full px-4 py-2 rounded-lg font-semibold transition-all bg-red-800 hover:bg-red-700 text-white"
-                                >
-                                    Clear Logs
-                                </button>
+                            <div>
+                                <p className="text-2xl font-bold text-white">{Math.floor(summary.totalMovingTime / 60)}</p>
+                                <p className="text-xs text-gray-400">Mins Moving</p>
                             </div>
-                        </>
-                    )}
-                </div>
-            </details>
+                            <div>
+                                <p className="text-2xl font-bold text-white">{summary.totalReports}</p>
+                                <p className="text-xs text-gray-400">Reports</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="w-full px-4 py-2 rounded-lg font-semibold transition-all bg-gray-700 hover:bg-gray-600 text-white"
+                            >
+                                View Full Log
+                            </button>
+                            <button
+                                onClick={handleClear}
+                                className="w-full px-4 py-2 rounded-lg font-semibold transition-all bg-red-800 hover:bg-red-700 text-white"
+                            >
+                                Clear Logs
+                            </button>
+                        </div>
+                    </>
+                )}
+            </div>
         </>
     );
 };

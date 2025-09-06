@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AIInsight, TripPhase } from '../types';
-import { BrainIcon, ClockIcon, NavigationIcon, RouteIcon, SparklesIcon, UserIcon, SearchIcon } from './icons/AiIcons';
+import { BrainIcon, ClockIcon, RouteIcon, SparklesIcon, UserIcon, SearchIcon } from './icons/AiIcons';
 
 interface AIInsightsPanelProps {
     insights: AIInsight[];
@@ -9,7 +9,6 @@ interface AIInsightsPanelProps {
     onPredictiveETA: () => void;
     onAnalyzeBehavior: () => void;
     onGetFeedback: () => void;
-    onGetDirections: () => void;
     onSuggestHotspot: () => void;
     isSimulating: boolean;
     tripPhase: TripPhase;
@@ -27,7 +26,7 @@ const AIButton: React.FC<{ onClick: () => void; disabled: boolean; icon: React.R
 );
 
 
-const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ insights, onOptimizeRoute, onPredictiveETA, onAnalyzeBehavior, onGetFeedback, onGetDirections, onSuggestHotspot, isSimulating, tripPhase }) => {
+const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ insights, onOptimizeRoute, onPredictiveETA, onAnalyzeBehavior, onGetFeedback, onSuggestHotspot, isSimulating, tripPhase }) => {
     const isMainRoute = tripPhase === TripPhase.MainRoute;
     const isRoaming = tripPhase === TripPhase.Roaming;
 
@@ -38,10 +37,9 @@ const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({ insights, onOptimizeR
                 <h2 className="text-xl font-bold text-white">AI Assistant</h2>
             </div>
             
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
                 <AIButton onClick={onOptimizeRoute} disabled={!isSimulating || !isMainRoute} icon={<RouteIcon className="text-cyan-400" />} text="Optimize" />
                 <AIButton onClick={onPredictiveETA} disabled={!isSimulating || !isMainRoute} icon={<ClockIcon className="text-cyan-400" />} text="Predict ETA" />
-                <AIButton onClick={onGetDirections} disabled={!isSimulating || !isMainRoute} icon={<NavigationIcon className="text-cyan-400" />} text="Directions" />
                 <AIButton onClick={onAnalyzeBehavior} disabled={!isSimulating} icon={<BrainIcon className="text-cyan-400" />} text="Analyze" />
                 <AIButton onClick={onGetFeedback} disabled={!isSimulating} icon={<UserIcon className="text-cyan-400" />} text="Feedback" />
                 <AIButton onClick={onSuggestHotspot} disabled={!isSimulating || !isRoaming} icon={<SearchIcon className="text-cyan-400" />} text="Hotspot" />
