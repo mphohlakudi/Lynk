@@ -1,0 +1,8 @@
+{
+  "name": "Lynk",
+  "description": "A real-time Taxi tracking application that provides live location updates, trip details, and AI-powered insights for route optimization, driver feedback, and predictive ETAs.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone"
+  ]
+}
