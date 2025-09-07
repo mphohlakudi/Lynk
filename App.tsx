@@ -88,6 +88,7 @@ const App: React.FC = () => {
         { id: 'apel-central', name: 'Apel Central', size: '15.2 MB', isDownloaded: false },
     ]);
     const [isMapCached, setIsMapCached] = useState<boolean>(false);
+    const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
 
     const isTripActive = trip.phase !== TripPhase.Idle && trip.phase !== TripPhase.Finished;
     const orientation = useScreenOrientation();
@@ -194,9 +195,28 @@ const App: React.FC = () => {
             destinationName: destination.name,
             destinationPosition: destination.position,
             destinationSegmentIndex: destination.segmentIndex,
-            etaMinutes: calculateEta(trip.currentPosition, trip.segmentIndex, destination.segmentIndex)
+            etaMinutes: calculateEta(trip.currentPosition, trip.segmentIndex, destination.segmentIndex),
+            hasPaid: false,
         });
     }
+    
+    const handleApplePay = () => {
+        if (isProcessingPayment) return;
+        setIsProcessingPayment(true);
+        addNotification("Processing payment...", "info");
+
+        setTimeout(() => {
+            setCommuterStatus(prev => ({
+                ...prev,
+                hasPaid: true,
+            }));
+            setIsProcessingPayment(false);
+            addNotification("Payment of R20.00 successful!", "success");
+            if (commuterPreferences.hapticFeedbackEnabled) {
+                hapticService.vibrateNotification('success');
+            }
+        }, 2500);
+    };
     
     const handleAddReport = (category: PassengerReportCategory, comment?: string) => {
         tripLogService.addPassengerReport({ category, comment });
@@ -260,6 +280,8 @@ const App: React.FC = () => {
                 onSetDestination={handleSetDestination}
                 commuterName={commuterPreferences.name}
                 onNameChange={(name) => setCommuterPreferences(p => ({ ...p, name }))}
+                onApplePay={handleApplePay}
+                isProcessingPayment={isProcessingPayment}
             />
             <CommuterFeedbackPanel onAddReport={handleAddReport} isTripActive={isTripActive} />
         </>

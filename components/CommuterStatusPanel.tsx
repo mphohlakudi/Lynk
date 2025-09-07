@@ -1,9 +1,11 @@
+
 // FIX: Implemented the CommuterStatusPanel component and added a default export to resolve the import error in App.tsx.
 import React from 'react';
 import { CommuterStatus, CommuterStatusType, Destination } from '../types';
 import { ClockIcon, GpsIcon, UsersIcon, CheckCircleIcon, SignalSlashIcon } from './icons/DetailIcons';
 import { HandIcon } from './icons/HandIcon';
 import { NavigationIcon } from './icons/AiIcons';
+import { ApplePayIcon } from './icons/ApplePayIcon';
 
 interface CommuterStatusPanelProps {
     status: CommuterStatus;
@@ -15,9 +17,11 @@ interface CommuterStatusPanelProps {
     onSetDestination: (destination: Destination) => void;
     commuterName: string;
     onNameChange: (newName: string) => void;
+    onApplePay: () => void;
+    isProcessingPayment: boolean;
 }
 
-const CommuterStatusPanel: React.FC<CommuterStatusPanelProps> = ({ status, isTripActive, onRequestStop, onHailTaxi, onCancelHail, destinations, onSetDestination, commuterName, onNameChange }) => {
+const CommuterStatusPanel: React.FC<CommuterStatusPanelProps> = ({ status, isTripActive, onRequestStop, onHailTaxi, onCancelHail, destinations, onSetDestination, commuterName, onNameChange, onApplePay, isProcessingPayment }) => {
     
     const renderStatusIcon = () => {
         switch (status.type) {
@@ -78,6 +82,46 @@ const CommuterStatusPanel: React.FC<CommuterStatusPanelProps> = ({ status, isTri
         }
         
         return null;
+    };
+
+    const renderPaymentSection = () => {
+        if (status.type !== CommuterStatusType.EN_ROUTE && status.type !== CommuterStatusType.APPROACHING_STOP) {
+            return null;
+        }
+
+        return (
+            <div className="bg-gray-800/50 p-3 rounded-lg">
+                <div className="flex justify-between items-center mb-3">
+                    <p className="font-semibold text-gray-300">Trip Fare</p>
+                    <p className="font-bold text-white text-lg">R20.00</p>
+                </div>
+                {status.hasPaid ? (
+                    <div className="flex items-center justify-center gap-2 text-green-400 font-semibold p-2 rounded-md bg-green-900/50 border border-green-700">
+                        <CheckCircleIcon />
+                        <span>Payment Confirmed</span>
+                    </div>
+                ) : (
+                    <button
+                        onClick={onApplePay}
+                        disabled={isProcessingPayment}
+                        className="w-full h-12 flex items-center justify-center rounded-lg font-semibold transition-all duration-300 bg-black text-white hover:bg-gray-800 border border-gray-600 disabled:opacity-70 disabled:cursor-wait"
+                        aria-label="Pay R20.00 with Apple Pay"
+                    >
+                        {isProcessingPayment ? (
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        ) : (
+                           <>
+                                <span className="mr-1">Pay with</span>
+                                <ApplePayIcon />
+                           </>
+                        )}
+                    </button>
+                )}
+            </div>
+        );
     };
 
     if (status.type === CommuterStatusType.SELECTING_DESTINATION) {
@@ -141,6 +185,7 @@ const CommuterStatusPanel: React.FC<CommuterStatusPanelProps> = ({ status, isTri
             </div>
 
             <div className="flex flex-col gap-2">
+                {renderPaymentSection()}
                 {renderActionButton()}
             </div>
         </div>

@@ -138,6 +138,7 @@ export interface CommuterStatus {
     destinationPosition?: Point;
     destinationSegmentIndex?: number;
     etaMinutes?: number;
+    hasPaid?: boolean;
 }
 
 // Types for Offline Map Caching
